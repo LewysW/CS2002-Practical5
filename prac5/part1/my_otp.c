@@ -6,6 +6,7 @@
 #include "my_otp.h"
 
 //TODO - make method for getting size of file.
+//TODO - consider moving while loop and switch into method.
 
 int main (int argc, char * argv []) {
     int opt;
@@ -92,7 +93,7 @@ FileStruct initInput(FileStruct input, int keySize) {
             fputc(c, temp);
             input.size++;
         }
-        
+
         fclose(temp);
         input.file = fopen("stdin.temp", "r");
     } else {
