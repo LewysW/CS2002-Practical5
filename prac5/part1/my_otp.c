@@ -92,6 +92,7 @@ FileStruct initInput(FileStruct input, int keySize) {
             fputc(c, temp);
             input.size++;
         }
+        
         fclose(temp);
         input.file = fopen("stdin.temp", "r");
     } else {
