@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -14,6 +15,12 @@ int main (int argc, char * argv []) {
     FileStruct output = {NULL, NULL, 0};
     FileStruct key = {NULL, NULL, 0};
 
+    if (argc == 1) {
+        printf("Optional arguments appear in brackets '[]':\n");
+        printf("Usage: my_otp [-i infile] [-o outfile] -k keyfile\n");
+        return 0;
+    }
+
     /*
     Gets arguments i, o, and k signifying the input file, output file and key file.
     */
@@ -26,15 +33,12 @@ int main (int argc, char * argv []) {
         switch (opt) {
             case 'i':
                 if (optarg != NULL) input.name = strdup(optarg);
-                printf("Option: '%c'\n", opt);
                 break;
             case 'o':
                 if (optarg != NULL) output.name = strdup(optarg);
-                printf("Option: '%c'\n", opt);
                 break;
             case 'k':
                 if (optarg != NULL) key.name = strdup(optarg);
-                printf("Option: '%c' w/ mandatory Argument: \"%s\"\n", opt, optarg);
                 break;
             case ':':
             case '?':
@@ -45,16 +49,35 @@ int main (int argc, char * argv []) {
         }
     }
 
-
     key = initKey(key);
-    input = initInput(input, key.size);
-    output = initOutput(output);
-    secureSend(input, key.file, output.file);
+    int fd[2];
+    pipe(fd);
 
-    fclose(input.file);
-    fclose(output.file);
+    pid_t child1 = fork();
+    pid_t child2 = -1;
+    if (child1 > 0) child2 = fork();
+
+    if (child1 == 0) {
+        input = initInput(input, key.size);
+        secureSend(input, key, fd);
+        fclose(input.file);
+        remove("stdin.temp");
+        _exit(0);
+    }
+
+    if (child2 == 0) {
+        output = initOutput(output);
+        secureReceive(output, fd);
+        fclose(output.file);
+        _exit(0);
+    }
+
+    int status;
+    waitpid(child1, &status, 0);
+    close(fd[WRITE]);
+    waitpid(child2, &status, 0);
+    close(fd[READ]);
     fclose(key.file);
-    remove("stdin.temp");
     return 0;
 }
 
@@ -67,10 +90,10 @@ FileStruct initKey(FileStruct key) {
     if (key.name == NULL) {
         exit(0);
     } else if (access(key.name, F_OK) == -1) {
-        printf("Key file could not be read.\n");
+        //printf("Key file could not be read.\n");
         exit(0);
     } else {
-        printf("Reading from key file...\n");
+        //printf("Reading from key file...\n");
         key.file = fopen(key.name, "r");
         fseek(key.file, 0, SEEK_END);
         key.size = ftell(key.file);
@@ -124,21 +147,34 @@ FileStruct initOutput(FileStruct output) {
     return output;
 }
 
-void secureSend(FileStruct message, FILE* key, FILE* destination) {
+void secureSend(FileStruct message, FileStruct key, int fd[2]) {
     int c = 0; //Cipher char
     int count = 0;
+    close(fd[READ]);
 
     while (count < message.size) {
-        c = cipher(fgetc(message.file), fgetc(key));
-        writeOutput(destination, c);
+        c = cipher(fgetc(message.file), fgetc(key.file));
+        write(fd[WRITE], &c, sizeof(c));
         count++;
     }
+
+    close(fd[WRITE]);
+
 }
 
 int cipher(int m, int k) {
     return (m^k);
 }
 
+void secureReceive(FileStruct destination, int fd[2]) {
+    int c;
+    close(fd[WRITE]);
+    while(read(fd[READ], &c, sizeof(c))) writeOutput(destination.file, c);
+    fclose(destination.file);
+    close(fd[READ]);
+}
+
 void writeOutput(FILE* output, int cipher) {
     fputc(cipher, output);
+    fflush(stdout);
 }
