@@ -44,7 +44,8 @@ int main (int argc, char * argv []) {
             case '?':
             default:
                 printf("Optional arguments appear in brackets '[]':\n");
-                printf("Usage: my_otp [-i infile] [-o outfile] -k keyfile: '-%c'.\n", optopt);
+                printf("Usage: my_otp [-i infile] [-o outfile] -k keyfile.\n");
+                exit(0);
                 break;
         }
     }
@@ -88,12 +89,14 @@ Else open and read from key file, and get file size.
 */
 FileStruct initKey(FileStruct key) {
     if (key.name == NULL) {
+        printf("Optional arguments appear in brackets '[]':\n");
+        printf("Usage: my_otp [-i infile] [-o outfile] -k keyfile.\n");
         exit(0);
     } else if (access(key.name, F_OK) == -1) {
-        //printf("Key file could not be read.\n");
+        printf("Key file could not be read.\n");
         exit(0);
     } else {
-        //printf("Reading from key file...\n");
+        printf("Reading from key file...\n");
         key.file = fopen(key.name, "r");
         fseek(key.file, 0, SEEK_END);
         key.size = ftell(key.file);

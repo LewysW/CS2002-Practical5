@@ -1,6 +1,9 @@
-#include <pthread.h>
-
 #ifndef MSG_QUEUE_H
+#include <pthread.h>
+#include <stdbool.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
 #define MSG_QUEUE_H
 
 
@@ -16,9 +19,15 @@ typedef struct {
 	Node *tail;
 } MQueue;
 
-void send_msg( MQueue *s, int value ); // enqueue
-Node *read_msg( MQueue *s );            // dequeue
-void initMQueue(MQueue *);
-void printMQueue(MQueue *);
+//Provided function definitions
+void send_msg( MQueue* s, int value ); // enqueue
+Node *read_msg( MQueue* s );            // dequeue
+void initMQueue(MQueue* s);
+void printMQueue(MQueue* s);
+
+//Additional function definitions
+bool is_empty(MQueue* s);
+MQueue* makeQueue();
+Node* makeNode(int value);
 
 #endif //MSG_QUEUE_H
