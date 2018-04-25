@@ -14,13 +14,18 @@ int main() {
         printMQueue(queue);
     }
 
-    for (int i = 1; i <= 100; i++) printf("*** TEST %d PASSED ***\n", i);
+    printf("Mutex destruction code: %d\n", pthread_mutex_destroy(&(queue->access)));
     free(queue);
     return 0;
 }
 
+/** makes a new MQueue
+Abstracts process of making MQueue away from main function.
+*/
 MQueue* makeQueue() {
+    //Allocates space for MQueue
     MQueue* queue = malloc(sizeof(MQueue));
+    //Initialises queue with default values.
     initMQueue(queue);
     return queue;
 }

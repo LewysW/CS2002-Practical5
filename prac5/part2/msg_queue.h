@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 #define MSG_QUEUE_H
 
 
@@ -17,6 +18,7 @@ typedef struct node{
 typedef struct {
 	Node *head;
 	Node *tail;
+	pthread_mutex_t access;
 } MQueue;
 
 //Provided function definitions
