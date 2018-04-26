@@ -7,6 +7,11 @@
 #include <pthread.h>
 #define MSG_QUEUE_H
 
+//For Test printing
+#define RED     "\033[31m"      /* Red */
+#define GREEN   "\033[32m"		/* Green */
+#define NUM_SINGLE_THREADED_TESTS 15
+#define NUM_MULTI_THREADED_TESTS 3
 
 /* Interface for integer MQueue */
 typedef struct node{
@@ -19,6 +24,7 @@ typedef struct {
 	Node *head;
 	Node *tail;
 	pthread_mutex_t access;
+	int size;
 } MQueue;
 
 //Provided function definitions
@@ -28,8 +34,39 @@ void initMQueue(MQueue* s);
 void printMQueue(MQueue* s);
 
 //Additional function definitions
-bool is_empty(MQueue* s);
 MQueue* makeQueue();
 Node* makeNode(int value);
+bool isNULLMQueue(MQueue* s);
+
+//Test running functions
+void initTests(bool (*testFunctions[]) (), int flag);
+int runTests(bool (*testFunctions[]) (), int numTests);
+
+//Multithreaded Queue Tests
+bool threadDoubleEnqueueSizeTest();
+bool threadEnqueueOrderTest();
+bool threadDequeueOrderTest();
+void* threadIterativeEnqueue(void* arg);
+void* threadIterativeDequeue(void* arg);
+void* threadEnqueueOnce(void* arg);
+
+//Single Threaded Queue Tests
+bool initialiseNodeTest();
+bool initialiseNodeValueTest();
+bool initialiseNodeNextTest();
+bool intialiseMQueueTest();
+bool intialiseMQueueMutexTest();
+bool intialiseMQueueHeadTest();
+bool intialiseMQueueTailTest();
+bool newMQueueEmptyTest();
+bool newMQueueSizeZeroTest();
+bool enqueueHeadTailTest();
+bool enqueueSizeTest();
+bool doubleEnqueueSizeTest();
+bool enqueueDequeueTest();
+bool doubleEnqueueDequeueTest();
+bool doubleEnqueueDequeueSizeTest();
+bool dequeueEmptyQueueTest();
+
 
 #endif //MSG_QUEUE_H

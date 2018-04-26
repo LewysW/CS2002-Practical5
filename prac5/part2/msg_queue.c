@@ -8,16 +8,13 @@ Creates a node initialised with a given integer value and attempts to enqueue it
 void send_msg( MQueue *s, int value ) {
     //Thread safety for node creation - threads wait while node is being created.
     pthread_mutex_lock(&(s->access));
+    //Exit if queue is NULL
+    if (s == NULL) exit(1);
     //Makes a new node with initialised with the given int value.
     Node* node = makeNode(value);
-    //Unlock mutex
-    pthread_mutex_unlock(&(s->access));
-
-    //Thread safety for enqueue process - threads wait while a node is being enqueued
-    pthread_mutex_lock(&(s->access));
 
     //If queue is empty point head and tail to node to be enqueued
-    if (is_empty(s)) {
+    if (s->head == NULL) {
         s->tail = s->head = node;
 
     //Otherwise add node to queue by pointing tail node of queue to new node and
@@ -27,6 +24,7 @@ void send_msg( MQueue *s, int value ) {
         s->tail = node;
     }
 
+    s->size++;
     //Unlock mutex
     pthread_mutex_unlock(&(s->access));
 }
@@ -38,14 +36,17 @@ Dequeues and returns the first value added the queue (pointed to by the head).
 Node *read_msg(MQueue* s) {
     //Thread safety - mutex locks access to queue manipulation while dequeuing
     pthread_mutex_lock(&(s->access));
+    //Exit if queue is NULL
+    if (s == NULL) exit(1);
 
     //If the queue is empty the head node is returned (should be NULL)
-    if (is_empty(s)) return s->head;
+    if (s->head == NULL) return s->head;
 
     //Otherwise if not empty then point a new node to the head of the queue...
     Node* node = s->head;
     //...and point head of queue to second element in queue (thereby removing the first node)
     s->head = s->head->next;
+    s->size--;
 
     //Unlock mutex
     pthread_mutex_unlock(&(s->access));
@@ -69,16 +70,9 @@ void initMQueue(MQueue* s) {
 
     //Sets tail equal to NULL and head equal to tail
     s->head = s->tail = NULL;
+    s->size = 0;
 
     //NULL value is used to check if MQueue is empty.
-}
-
-/** checks if MQueue is empty
-Returns true if MQueue is empty or false if not empty.
-*/
-bool is_empty(MQueue* s) {
-    //Queue is empty if head is NULL as there are no nodes to point to.
-    return (s->head == NULL);
 }
 
 /** prints values of MQueue elements
@@ -89,9 +83,11 @@ element from oldest to newest element added.
 void printMQueue(MQueue* s) {
     //Mutex locked to ensure thread safety.
     pthread_mutex_lock(&(s->access));
+    //Exit if queue is NULL
+    if (s == NULL) exit(1);
 
     //If queue is empty then print "Empty queue" and return from function.
-    if (is_empty(s)) {
+    if (s->head == NULL) {
         printf("Empty queue.\n");
         return;
     }
