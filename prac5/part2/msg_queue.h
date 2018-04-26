@@ -27,6 +27,12 @@ typedef struct {
 	int size;
 } MQueue;
 
+typedef struct {
+	MQueue* queue;
+	int counter;
+	bool passed;
+} TestMQueue;
+
 //Provided function definitions
 void send_msg( MQueue* s, int value ); // enqueue
 Node *read_msg( MQueue* s );            // dequeue

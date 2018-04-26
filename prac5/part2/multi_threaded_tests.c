@@ -52,42 +52,34 @@ void* threadIterativeEnqueue(void* arg) {
 
 bool threadDequeueOrderTest() {
     pthread_t tid[2];
-    bool *passed;
-    passed = malloc(sizeof(bool));
-    MQueue* queue = makeQueue();
-    for (int i = 0; i < 1000; i++) send_msg(queue, i);
-    printMQueue(queue);
-    pthread_create(&(tid[0]), NULL, threadIterativeDequeue, queue);
-    pthread_create(&(tid[1]), NULL, threadIterativeDequeue, queue);
-    pthread_join(tid[0], (void*) passed);
-    pthread_join(tid[1], (void*) passed);
-    printMQueue(queue);
-    printf("Passed: %d\n", *passed);
+    TestMQueue* testMQueue = malloc(sizeof(TestMQueue));
+    testMQueue->queue = makeQueue();
+    testMQueue->counter = 0;
+    testMQueue->passed = true;
 
-    return (passed);
+    int i = 0;
+    for (i = 0; i < 1000; i++) send_msg(testMQueue->queue, i);
+    pthread_create(&(tid[0]), NULL, threadIterativeDequeue, testMQueue);
+    pthread_create(&(tid[1]), NULL, threadIterativeDequeue, testMQueue);
+    pthread_join(tid[0], NULL);
+    pthread_join(tid[1], NULL);
+    int n = i - 1; //Upperbound of iteration.
+    int result = (n * (n + 1))/2; //Gaussian formula for sum of 1 to n
+    return (result == testMQueue->counter);
 }
 
 void* threadIterativeDequeue(void* arg) {
-    int counter = 0;
-    bool* passed = malloc(sizeof(bool));
-    *passed = true;
     while(true) {
         pthread_mutex_lock(&mutex);
-        int element = 0;
-        counter++;
-        if ((((MQueue*) arg)->size) > 0) {
-            printf("Counter: %d\n", counter);
-            if ((element = (read_msg((MQueue*)arg)->data)) != counter) {
-                printf("Counter1: %d\n", counter);
-                printf("Dequeued Value: - %d\n", element);
-                *passed = false;
-            } else {
-                pthread_mutex_unlock(&mutex);
-                return NULL;
-            }
+        if ((((TestMQueue*) arg)->queue->size) > 0) {
+            ((TestMQueue*) arg)->counter += read_msg(((TestMQueue*) arg)->queue)->data;
+        } else {
             pthread_mutex_unlock(&mutex);
+            return NULL;
         }
 
+        pthread_mutex_unlock(&mutex);
+
     }
-    pthread_exit((void*) passed);
+    pthread_exit((void*) "Goodbye!");
 }
