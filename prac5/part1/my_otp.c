@@ -158,7 +158,7 @@ FileStruct* initInput(FileStruct* input, int keySize) {
         //...Create temporary file to write to...
         FILE* temp = fopen("stdin.temp", "w");
         int c;
-        //Write input from stdin to temp file for program compatiblity
+        //Write input from stdin to temp file for program compatiblity and increment size
         while ((c = getchar()) != -1 && input->size < keySize) {
             fputc(c, temp);
             input->size++;
@@ -186,7 +186,7 @@ Reverts to stdout if no file is specified, otherwise uses output file specified 
 */
 FileStruct* initOutput(FileStruct* output) {
     //If no output file is specified...
-    if (output->name == NULL) {
+    if (output->name == NULL || access(output->name, F_OK) == -1) {
         //..then revert to stdout for output
         printf("Reverting to stdout for output...\n");
         output->file = stdout;

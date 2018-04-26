@@ -4,6 +4,7 @@
 #define READ 0
 #define WRITE 1
 
+//Struct to abstract data relating to input, output and key file.
 typedef struct {
     FILE* file;
     char* name;
