@@ -10,7 +10,7 @@
 //For Test printing
 #define RED     "\033[31m"      /* Red */
 #define GREEN   "\033[32m"		/* Green */
-#define NUM_SINGLE_THREADED_TESTS 15
+#define NUM_SINGLE_THREADED_TESTS 14
 #define NUM_MULTI_THREADED_TESTS 3
 
 /* Interface for integer MQueue */
@@ -27,6 +27,7 @@ typedef struct {
 	int size;
 } MQueue;
 
+//Test queue struct to allow for value checking within thread-called functions
 typedef struct {
 	MQueue* queue;
 	int counter;
@@ -64,7 +65,6 @@ bool intialiseMQueueTest();
 bool intialiseMQueueMutexTest();
 bool intialiseMQueueHeadTest();
 bool intialiseMQueueTailTest();
-bool newMQueueEmptyTest();
 bool newMQueueSizeZeroTest();
 bool enqueueHeadTailTest();
 bool enqueueSizeTest();

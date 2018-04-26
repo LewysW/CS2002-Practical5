@@ -1,5 +1,5 @@
 msg_queue: msg_queue.o mq_test.o single_threaded_tests.o multi_threaded_tests.o
-	gcc -Wall -Wextra -g mq_test.o msg_queue.o single_threaded_tests.o multi_threaded_tests.o -o msg_queue -lpthread
+	gcc -Wall -Wextra -g mq_test.o msg_queue.o single_threaded_tests.o multi_threaded_tests.o -o msg_queue -pthread
 
 msg_queue.o: msg_queue.c msg_queue.h
 		 gcc -Wall -Wextra -g msg_queue.c -c -o msg_queue.o
